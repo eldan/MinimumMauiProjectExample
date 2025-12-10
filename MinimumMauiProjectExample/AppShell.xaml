@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="MinimumMauiProjectExample.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:MinimumMauiProjectExample.Views"
+    xmlns:m="clr-namespace:MinimumMauiProjectExample"
+    Shell.FlyoutBehavior="Locked"
+    Title="MinimumMauiProjectExample">
+    <ShellContent
+            IsVisible="{Binding IsNotLogin}"
+            Title="Register Page"
+            ContentTemplate="{DataTemplate local:RegisterPage}"
+            Route="RegisterPage" />
+
+        <ShellContent
+            IsVisible="{Binding IsNotLogin}"
+            Title="Login Page"
+            ContentTemplate="{DataTemplate local:LoginPage}"
+            Route="LoginPage" />
+
+        <ShellContent
+            IsVisible="{Binding IsLogin}"
+            Title="Items Page"
+            ContentTemplate="{DataTemplate local:ItemsPage}"
+            Route="ItemsPage" />
+
+    <ShellContent
+            IsVisible="{Binding IsLogin}"
+            Title="LogoutPage"
+            ContentTemplate="{DataTemplate local:LogoutPage}"
+            Route="LogoutPage" />
+
+    <ShellContent
+            IsVisible="False"
+            Title="MainPage"
+            ContentTemplate="{DataTemplate m:MainPage}"
+            Route="MainPage" />
+</Shell>

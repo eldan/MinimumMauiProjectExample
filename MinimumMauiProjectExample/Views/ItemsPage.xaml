@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="MinimumMauiProjectExample.Views.ItemsPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:models="clr-namespace:MinimumMauiProjectExample.Models"
+    xmlns:viewmodels="clr-namespace:MinimumMauiProjectExample.ViewModels"
+    Title="ItemsPage">
+    <ScrollView>
+
+    <VerticalStackLayout>
+      <Picker
+                Title="Select a Category by Order (we are going to filter Items by this picker)"
+                ItemDisplayBinding="{Binding Name}"
+                ItemsSource="{Binding CategoryListByOrder}"
+                SelectedItem="{Binding SelectedCategory}"
+                TextColor="DarkBlue" />
+
+            <Label
+                FontSize="Header"
+                HorizontalOptions="Center"
+                Text="- List Of Items -"
+                VerticalOptions="Center" />
+
+            <CollectionView ItemsSource="{Binding ItemListFiltered}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <StackLayout Padding="10" Orientation="Horizontal">
+                            <Label Text="{Binding Name}" VerticalOptions="Center" />
+                            <Label Padding="10" Text=": " />
+                            <Label Text="{Binding Description}" VerticalOptions="Center" />
+
+                            <Button
+                                BackgroundColor="red"
+                                Command="{Binding DeleteItemCommand, Source={x:RelativeSource AncestorType={x:Type viewmodels:ItemsPageViewModel}, Mode=FindAncestorBindingContext}}"
+                                CommandParameter="{Binding .}"
+                                Text="Remove" />
+                        </StackLayout>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+
+            <Label
+                FontSize="Header"
+                HorizontalOptions="Center"
+                Text="- Add an Item -"
+                VerticalOptions="Center" />
+
+            <Label
+                HorizontalOptions="Start"
+                Text="Item Name"
+                VerticalOptions="Center" />
+            <Entry Text="{Binding ItemToAddName}" />
+
+            <Label
+                HorizontalOptions="Start"
+                Text="Item Description"
+                VerticalOptions="Center" />
+            <Entry Text="{Binding ItemToAddDesciption}" />
+
+            <ListView ItemsSource="{Binding ItemToAddCategories}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ViewCell>
+                            <HorizontalStackLayout>
+                                <CheckBox IsChecked="{Binding IsChecked}" />
+                                <Label Text="{Binding Name}" />
+                            </HorizontalStackLayout>
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            <Button
+                Command="{Binding AddItemCommand}"
+                Text="Add Item"
+                WidthRequest="150" />
+            <Button BackgroundColor="Transparent" TextColor="blue" Command="{Binding LogoutCommand}" Text="Logout"/>
+        </VerticalStackLayout>
+        
+    </ScrollView>
+
+
+</ContentPage>
