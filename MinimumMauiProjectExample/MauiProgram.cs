@@ -7,8 +7,7 @@ namespace MinimumMauiProjectExample
     {
         public static MauiApp CreateMauiApp()
         {
-            //AppService.Init();
-            AppService.Init();
+            AppService.GetInstance().Init();
             var builder = MauiApp.CreateBuilder();
             builder.UseMauiApp<App>().ConfigureFonts(fonts =>
             {

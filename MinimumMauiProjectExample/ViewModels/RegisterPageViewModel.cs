@@ -1,4 +1,4 @@
-﻿using MinimumMauiProjectExample.Services;
+using MinimumMauiProjectExample.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -74,10 +74,10 @@ namespace MinimumMauiProjectExample.ViewModels
         #region Methods / Functions
         private async Task Register()
         {
-            bool successed = await AppService.TryRegister(emailInput, passwordInput1);
+            bool successed = await AppService.GetInstance().TryRegister(emailInput, passwordInput1);
             if (successed)
             {
-                bool successedLogin = await AppService.TryLogin(emailInput, passwordInput1);
+                bool successedLogin = await AppService.GetInstance().TryLogin(emailInput, passwordInput1);
                 if (successedLogin) {
                     await Shell.Current.GoToAsync("//ItemsPage");
                 }

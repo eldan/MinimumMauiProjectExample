@@ -43,7 +43,7 @@ namespace MinimumMauiProjectExample.ViewModels
         #region Methods / Functions
         private async Task Login()
         {
-            bool successed = await AppService.TryLogin(emailInput, passwordInput);
+            bool successed = await AppService.GetInstance().TryLogin(emailInput, passwordInput);
             if (successed)
             {
                 await Shell.Current.GoToAsync("//ItemsPage");

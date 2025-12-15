@@ -5,35 +5,35 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:MinimumMauiProjectExample.Views"
     xmlns:m="clr-namespace:MinimumMauiProjectExample"
-    Shell.FlyoutBehavior="Locked"
-    Title="MinimumMauiProjectExample">
-    <ShellContent
-            IsVisible="{Binding IsNotLogin}"
-            Title="Register Page"
-            ContentTemplate="{DataTemplate local:RegisterPage}"
-            Route="RegisterPage" />
-
-        <ShellContent
-            IsVisible="{Binding IsNotLogin}"
-            Title="Login Page"
-            ContentTemplate="{DataTemplate local:LoginPage}"
-            Route="LoginPage" />
-
-        <ShellContent
-            IsVisible="{Binding IsLogin}"
-            Title="Items Page"
-            ContentTemplate="{DataTemplate local:ItemsPage}"
-            Route="ItemsPage" />
+    Title="MinimumMauiProjectExample"
+    Shell.FlyoutBehavior="Flyout">
 
     <ShellContent
-            IsVisible="{Binding IsLogin}"
-            Title="LogoutPage"
-            ContentTemplate="{DataTemplate local:LogoutPage}"
-            Route="LogoutPage" />
+        Title="Login Page"
+        ContentTemplate="{DataTemplate local:LoginPage}"
+        IsVisible="{Binding IsNotLogin}"
+        Route="LoginPage" />
 
     <ShellContent
-            IsVisible="False"
-            Title="MainPage"
-            ContentTemplate="{DataTemplate m:MainPage}"
-            Route="MainPage" />
+        Title="Register Page"
+        ContentTemplate="{DataTemplate local:RegisterPage}"
+        IsVisible="{Binding IsNotLogin}"
+        Route="RegisterPage" />
+
+    <ShellContent
+        Title="Items Page"
+        ContentTemplate="{DataTemplate local:ItemsPage}"
+        IsVisible="{Binding IsLogin}"
+        Route="ItemsPage" />
+
+    <ShellContent
+        Title="MainPage"
+        ContentTemplate="{DataTemplate m:MainPage}"
+        IsVisible="False"
+        Route="MainPage" />
+
+    <MenuItem
+        Command="{Binding LogoutCommand}"
+        IsEnabled="{Binding IsLogin}"
+        Text="{Binding LogoutText}" />
 </Shell>
