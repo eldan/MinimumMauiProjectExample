@@ -41,14 +41,15 @@ namespace MinimumMauiProjectExample.ViewModels
         #endregion
 
         #region Methods / Functions
-        private async Task Login()
+        private async Task Login()//
         {
             bool successed = await AppService.GetInstance().TryLogin(emailInput, passwordInput);
             if (successed)
             {
-                await Shell.Current.GoToAsync("//ItemsPage");
+                ((App)Application.Current).SetAuthenticatedShell();
+                // This will also navigate to the 1st page int the AuthenticatedShell 
             }
-        }
+          }
         #endregion
     }
 }

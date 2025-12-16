@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Shell
+    x:Class="MinimumMauiProjectExample.AppShellAuth"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:MinimumMauiProjectExample.Views"
+    xmlns:m="clr-namespace:MinimumMauiProjectExample"
+    Shell.FlyoutBehavior="Flyout">
+    <ShellContent
+        Title="Items Page"
+        ContentTemplate="{DataTemplate local:ItemsPage}"
+        Route="ItemsPage" />
+
+    <ShellContent
+        Title="MainPage"
+        ContentTemplate="{DataTemplate m:MainPage}"
+        Route="MainPage" />
+
+    <MenuItem Clicked="MenuItem_Logout_Clicked" Text="Logout" />
+</Shell>

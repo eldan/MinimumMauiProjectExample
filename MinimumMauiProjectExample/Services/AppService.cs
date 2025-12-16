@@ -91,10 +91,8 @@ namespace MinimumMauiProjectExample.Services
         // Person person = new Person(){Email=authUser.User.info.Email, ...
         // Don't put the password in the Person :)
 
-        var appShell = (AppShell)Application.Current.MainPage;
+       // ((App)Application.Current).SetAuthenticatedShell();
 
-        ShellViewModel.instance.IsLogin = true;
-        ShellViewModel.instance.IsNotLogin = false;
         return true;
       }
       catch (FirebaseAuthException ex)
