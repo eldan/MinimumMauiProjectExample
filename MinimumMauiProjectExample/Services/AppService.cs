@@ -17,12 +17,13 @@ namespace MinimumMauiProjectExample.Services
 {
   class AppService
   {
-    static public List<Category>? categories;
-    static public List<Item>? items;
+    public List<Category>? categories;
+    public List<Item>? items;
 
-    static FirebaseAuthClient? auth;
-    static FirebaseClient? client;
-    static public AuthCredential? loginAuthUser;
+    FirebaseAuthClient? auth;
+    FirebaseClient? client;
+    public AuthCredential? loginAuthUser; //This is to keep the logged in user credential, so we can logout later
+    public AuthUser fullDetaillsLoggedInUser;
 
     // SingleTone Pattern
     static private AppService instance;
@@ -84,6 +85,11 @@ namespace MinimumMauiProjectExample.Services
       {
         var authUser = await auth.SignInWithEmailAndPasswordAsync(userNameString, passwordString);
         loginAuthUser = authUser.AuthCredential;
+        fullDetaillsLoggedInUser = new AuthUser()
+        {
+          Email = auth.User.Info.Email,
+          Id = auth.User.Uid
+        };
         // Authentication successful 
         // We keep the token or Credential in loginAuthUser, so we can erase it later in logout
         // You can access the authenticated user's details via authUser.User
@@ -91,7 +97,7 @@ namespace MinimumMauiProjectExample.Services
         // Person person = new Person(){Email=authUser.User.info.Email, ...
         // Don't put the password in the Person :)
 
-       // ((App)Application.Current).SetAuthenticatedShell();
+        // ((App)Application.Current).SetAuthenticatedShell();
 
         return true;
       }
@@ -102,17 +108,18 @@ namespace MinimumMauiProjectExample.Services
       }
     }
 
-    public Task<bool> TryLogout()
+    public bool Logout()
     {
       try
       {
         auth.SignOut();
         loginAuthUser = null;
-        return Task.FromResult(true);
+        fullDetaillsLoggedInUser = null;
+        return true;
       }
-      catch (Exception ex)
+      catch
       {
-        return Task.FromResult(false);
+        return false;
       }
     }
 
@@ -131,10 +138,10 @@ namespace MinimumMauiProjectExample.Services
       }
     }
 
-    public Task<List<Category>> GetCategoriesByOrderAsync()
+    public List<Category> GetCategoriesByOrder()
     {
       List<Category> newList = categories.OrderBy(ctgry => ctgry.Order).ToList();
-      return Task.FromResult(categories);
+      return newList;
     }
 
     public async Task<List<Item>> GetAllItemsAsync()
@@ -145,10 +152,10 @@ namespace MinimumMauiProjectExample.Services
         // Create Empty List of Items
         List<Item> newitems = new List<Item>();
 
-        // Fetch them from FireBase and translate them (not to Item) to another class FBItem. (the Class is beneath)
+        // Fetch them from FireBase specific user (loggin user) and translate them (not to Item) to another class FBItem. (the Class is beneath)
         // Why do add FBItem? FBItem is almost the same as Item, only FBItem has exactly the structure as in FireBase (List of Categories Ids)
         // So we will populate a List of FBItem and in 2nd stage, change each of them to our Item
-        var itemsFromFB = await client.Child("items").OnceAsync<FBItem>();
+        var itemsFromFB = await client.Child("users").Child(fullDetaillsLoggedInUser.Id).Child("items").OnceAsync<FBItem>();
         // We are going over each of our new FBItem
         // And creating an Item with the same data (only now instead of Category, we have Category ID)
         foreach (var fbItem in itemsFromFB)
@@ -177,29 +184,12 @@ namespace MinimumMauiProjectExample.Services
       }
     }
 
-    public async Task<List<Item>> GetAllItemsAccordingACategoryAsync(string categoryName)
+    public List<Item> GetAllItemsAccordingACategory(string categoryName)
     {
-      //the following is an example of how to get filtered items from the ALREADY loaded data.
+      // The following is an example of how to get filtered items from the ALREADY loaded data.
+      // The method does not have to be async, because we are not going to the server.
       List<Item> filteredItems = items.Where(itm => itm.Categories.Any(ctgry => ctgry.Name == categoryName)).ToList();
       return filteredItems;
-    }
-
-    public async Task<bool> DeleteItemAsync(Item theItemToDelete)
-    {
-      if (items != null)
-      {
-
-        if (items.Contains(theItemToDelete))
-        {
-          //remove item by its FirebaseKey
-          string keyToDelete = theItemToDelete.Id;
-          await client.Child("items").Child(keyToDelete).DeleteAsync();
-
-          items.Remove(theItemToDelete);
-          return true;
-        }
-      }
-      return false;
     }
 
     public async Task<bool> AddItemAsync(Item theItemToAdd)
@@ -211,7 +201,12 @@ namespace MinimumMauiProjectExample.Services
         // Create a new FireBase Item
         FBItem fbItem = new FBItem() { Name = theItemToAdd.Name, Description = theItemToAdd.Description, Categories = categoriesIds };
         // Save the new Item
-        var result = await client.Child("items").PostAsync(fbItem);
+        var result = await client
+          .Child("users")
+          .Child(fullDetaillsLoggedInUser.Id)
+          .Child("items")
+          .PostAsync(fbItem);
+
         // Get back from the action, the Id that firebase created for the specific Item
         // and assign it to our new local Item
         theItemToAdd.Id = result.Key;
@@ -223,7 +218,29 @@ namespace MinimumMauiProjectExample.Services
       {
         throw;
       }
+    }
 
+    public async Task<bool> DeleteItemAsync(Item theItemToDelete)
+    {
+      if (items != null)
+      {
+          if (items.Contains(theItemToDelete))
+          {
+            //remove item by its FirebaseKey
+            string keyToDelete = theItemToDelete.Id;
+          try
+          {
+            await client.Child("users").Child(fullDetaillsLoggedInUser.Id).Child("items").Child(keyToDelete).DeleteAsync();
+            items.Remove(theItemToDelete);
+            return true;
+          }
+          catch
+          {
+            return false;
+          }
+        }
+      }
+      return false;
     }
 
     class FBItem // Same as Item, only List<String>? Categories is a bit different. It uses a list of Id's

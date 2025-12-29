@@ -73,7 +73,7 @@ namespace MinimumMauiProjectExample.ViewModels
     {
       if (IsLogin)
       {
-        bool successed = await AppService.GetInstance().TryLogout();
+        bool successed = AppService.GetInstance().Logout();
         if (successed)
         {
           IsLogin = false;

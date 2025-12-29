@@ -59,19 +59,10 @@ namespace MinimumMauiProjectExample.ViewModels
         }
         else
         {
-           _ = GetAllItemsAccordingACategory(value.Name);
+           CreateItemsAccordingACategory(value.Name);
         }
         OnPropertyChanged(nameof(SelectedCategory));
       }
-    }
-
-    private async Task GetAllItems()
-    {
-      ItemListFiltered = new ObservableCollection<Item>(await AppService.GetInstance().GetAllItemsAsync());
-    }
-    private async Task GetAllItemsAccordingACategory(string filter)
-    {
-      ItemListFiltered = new ObservableCollection<Item>(await AppService.GetInstance().GetAllItemsAccordingACategoryAsync(filter));
     }
 
     private ObservableCollection<Item>? itemListFiltered;
@@ -116,7 +107,6 @@ namespace MinimumMauiProjectExample.ViewModels
     public ICommand DeleteItemCommand { get; }
     public ICommand UpdateCommand { get; }
     public ICommand AddItemCommand { get; }
-    public ICommand LogoutCommand { get; }
     #endregion
 
     #region Constructor
@@ -124,7 +114,6 @@ namespace MinimumMauiProjectExample.ViewModels
     public ItemsPageViewModel()
     {
       InitializeAsync();
-        
       DeleteItemCommand = new Command<Item>(async (item) => await DeleteItem(item));
       AddItemCommand = new Command(async () => await AddItem());
 
@@ -137,13 +126,22 @@ namespace MinimumMauiProjectExample.ViewModels
     {
       CategoryList = await AppService.GetInstance().GetCategoriesAsync();
       ItemListFiltered = new ObservableCollection<Item>(await AppService.GetInstance().GetAllItemsAsync());
-      ItemToAddCategories = new ObservableCollection<Category>(await AppService.GetInstance().GetCategoriesByOrderAsync());
+      ItemToAddCategories = new ObservableCollection<Category>(AppService.GetInstance().GetCategoriesByOrder());
       
     }
 
     #endregion
 
     #region Methods/Functions
+    private async Task GetAllItems()
+    {
+      ItemListFiltered = new ObservableCollection<Item>(await AppService.GetInstance().GetAllItemsAsync());
+    }
+
+    private void CreateItemsAccordingACategory(string filter)
+    {
+      ItemListFiltered = new ObservableCollection<Item>(AppService.GetInstance().GetAllItemsAccordingACategory(filter));
+    }
 
     private async Task DeleteItem(Item theItemToDelete)
         {
@@ -176,7 +174,7 @@ namespace MinimumMauiProjectExample.ViewModels
           OnPropertyChanged(nameof(ItemToAddDesciption));
 
           ItemToAddCategories.Clear();
-          ItemToAddCategories = new ObservableCollection<Category>(await AppService.GetInstance().GetCategoriesByOrderAsync());
+          ItemToAddCategories = new ObservableCollection<Category>(AppService.GetInstance().GetCategoriesByOrder());
           foreach (var c in ItemToAddCategories)
             c.IsChecked = false;
 

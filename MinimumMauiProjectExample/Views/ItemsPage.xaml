@@ -8,8 +8,8 @@
     Title="ItemsPage">
     <ScrollView>
 
-    <VerticalStackLayout>
-      <Picker
+        <VerticalStackLayout>
+            <Picker
                 Title="Select a Category by Order (we are going to filter Items by this picker)"
                 ItemDisplayBinding="{Binding Name}"
                 ItemsSource="{Binding CategoryListByOrder}"
@@ -71,13 +71,9 @@
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
-            <Button
-                Command="{Binding AddItemCommand}"
-                Text="Add Item"
-                WidthRequest="150" />
-            <Button BackgroundColor="Transparent" TextColor="blue" Command="{Binding LogoutCommand}" Text="Logout"/>
+
         </VerticalStackLayout>
-        
+
     </ScrollView>
 
 
