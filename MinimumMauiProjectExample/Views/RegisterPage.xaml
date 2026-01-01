@@ -12,17 +12,23 @@
         <Entry Text="{Binding EmailInput}" />
 
         <Label 
-         Text="Type a Password"
-         VerticalOptions="Center" 
-         HorizontalOptions="Center" />
+            Text="Type a Password"
+            VerticalOptions="Center" 
+            HorizontalOptions="Center" />
         <Entry Text="{Binding PasswordInput1}" />
 
         <Label 
-          Text="ReType your Password"
-          VerticalOptions="Center" 
-          HorizontalOptions="Center" />
+            Text="ReType your Password"
+            VerticalOptions="Center" 
+            HorizontalOptions="Center" />
         <Entry Text="{Binding PasswordInput2}" />
-        
+
+        <Label 
+           Text="Full Name"
+           VerticalOptions="Center" 
+           HorizontalOptions="Center" />
+        <Entry Text="{Binding FullName}" />
+
         <Button Command="{Binding SubmitRegisterCommand}" IsEnabled="{Binding IsRegisterButtonEnabled}" Text="Register"/>
         <Button BackgroundColor="Transparent" TextColor="blue" Command="{Binding GoLoginCommand}" Text="Go Login"/>
 

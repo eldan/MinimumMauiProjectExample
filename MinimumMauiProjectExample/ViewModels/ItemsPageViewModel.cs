@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Security.AccessControl;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -11,178 +12,189 @@ using System.Windows.Input;
 
 namespace MinimumMauiProjectExample.ViewModels
 {
-  class ItemsPageViewModel : ViewModelBase
-  {
-
-    #region Getters & Setters
-    private List<Category>? categoryList;
-    public List<Category>? CategoryList
+    class ItemsPageViewModel : ViewModelBase
     {
-      get { return categoryList; }
-      set
-      {
-        categoryList = value;
-        CategoryListByOrder = value;
-      }
-    }
 
-    private List<Category>? categoryListByOrder;
-    public List<Category>? CategoryListByOrder
-    {
-      get
-      {
-        if (categoryList == null) return null;
-        categoryListByOrder = new List<Category>(CategoryList);
-        Category categoryAll = new Category() { Name = "All", Order = -9999 };//Add To List the "All" option
-        categoryListByOrder.Add(categoryAll);
-        categoryListByOrder = this.categoryListByOrder.OrderBy(o => o.Order).ToList();
-        return categoryListByOrder;
-      }
-      set
-      {
-        categoryListByOrder = categoryList;
-        OnPropertyChanged(nameof(CategoryListByOrder));
-      }
-    }
+        #region Getters & Setters
 
-    private Category selectedCategory;
-    public Category SelectedCategory
-    {
-      get { return selectedCategory; }
-      set
-      {
-        selectedCategory = value;
-        if (value.Name == "All")
+        private string loggedInUserName;
+        public string LoggedInUserName
         {
-
-           _ = GetAllItems();
+            get { return AppService.GetInstance().GetUserFullName(); }
         }
-        else
+
+        private List<Category>? categoryList;
+        public List<Category>? CategoryList
         {
-           CreateItemsAccordingACategory(value.Name);
+            get { return categoryList; }
+            set
+            {
+                categoryList = value;
+                CategoryListByOrder = value;
+            }
         }
-        OnPropertyChanged(nameof(SelectedCategory));
-      }
-    }
 
-    private ObservableCollection<Item>? itemListFiltered;
-    public ObservableCollection<Item>? ItemListFiltered
-    {
-      get { return itemListFiltered; }
-      set
-      {
-        itemListFiltered = value;
-        OnPropertyChanged(nameof(ItemListFiltered));
-      }
-    }
+        private List<Category>? categoryListByOrder;
+        public List<Category>? CategoryListByOrder
+        {
+            get
+            {
+                if (categoryList == null) return null;
+                categoryListByOrder = new List<Category>(CategoryList); // Dulicate original List
+                Category categoryWordAll = new Category() { Name = "All", Order = -9999 };// Add To List the "All" option
+                categoryListByOrder.Add(categoryWordAll);
+                categoryListByOrder = this.categoryListByOrder.OrderBy(o => o.Order).ToList();
+                return categoryListByOrder;
+            }
+            set
+            {
+                categoryListByOrder = categoryList;
+                OnPropertyChanged(nameof(CategoryListByOrder));
+            }
+        }
 
-    private string itemToAddName;
-    public string ItemToAddName
-    {
-      get { return itemToAddName; }
-      set { itemToAddName = value; }
-    }
+        private Category selectedCategory;
+        public Category SelectedCategory
+        {
+            get { return selectedCategory; }
+            set
+            {
+                selectedCategory = value;
+                if (value.Name == "All")
+                {
 
-    private string itemToAddDesciption;
-    public string ItemToAddDesciption
-    {
-      get { return itemToAddDesciption; }
-      set { itemToAddDesciption = value; }
-    }
+                    _ = GetAllItems();
+                }
+                else
+                {
+                    CreateItemsAccordingACategory(value.Name);
+                }
+                OnPropertyChanged(nameof(SelectedCategory));
+            }
+        }
 
-    private ObservableCollection<Category> itemToAddCategories;
-    public ObservableCollection<Category> ItemToAddCategories
-    {
-      get { return itemToAddCategories; }
-      set
-      {
-        itemToAddCategories = value;
-        OnPropertyChanged(nameof(ItemToAddCategories));
-      }
-    }
+        private ObservableCollection<Item>? itemListFiltered;
+        public ObservableCollection<Item>? ItemListFiltered
+        {
+            get { return itemListFiltered; }
+            set
+            {
+                itemListFiltered = value;
+                OnPropertyChanged(nameof(ItemListFiltered));
+            }
+        }
 
-    #endregion
+        private string itemToAddName;
+        public string ItemToAddName
+        {
+            get { return itemToAddName; }
+            set { itemToAddName = value; }
+        }
 
-    #region Commands Declaration
-    public ICommand DeleteItemCommand { get; }
-    public ICommand UpdateCommand { get; }
-    public ICommand AddItemCommand { get; }
-    #endregion
+        private string itemToAddDesciption;
+        public string ItemToAddDesciption
+        {
+            get { return itemToAddDesciption; }
+            set { itemToAddDesciption = value; }
+        }
 
-    #region Constructor
+        private ObservableCollection<Category> itemToAddCategories;
+        public ObservableCollection<Category> ItemToAddCategories
+        {
+            get { return itemToAddCategories; }
+            set
+            {
+                itemToAddCategories = value;
+                OnPropertyChanged(nameof(ItemToAddCategories));
+            }
+        }
 
-    public ItemsPageViewModel()
-    {
-      InitializeAsync();
-      DeleteItemCommand = new Command<Item>(async (item) => await DeleteItem(item));
-      AddItemCommand = new Command(async () => await AddItem());
+        #endregion
 
-      if (SelectedCategory !=null) {
-        SelectedCategory = CategoryListByOrder[0]; // Select the All option
-      }
-    }
+        #region Commands Declaration
+        public ICommand DeleteItemCommand { get; }
+        public ICommand UpdateCommand { get; }
+        public ICommand AddItemCommand { get; }
+        #endregion
 
-    private async Task InitializeAsync()
-    {
-      CategoryList = await AppService.GetInstance().GetCategoriesAsync();
-      ItemListFiltered = new ObservableCollection<Item>(await AppService.GetInstance().GetAllItemsAsync());
-      ItemToAddCategories = new ObservableCollection<Category>(AppService.GetInstance().GetCategoriesByOrder());
-      
-    }
+        #region Constructor
 
-    #endregion
+        public ItemsPageViewModel()
+        {
+            InitializeAsync();
+            DeleteItemCommand = new Command<Item>(async (item) => await DeleteItem(item));
+            AddItemCommand = new Command(async () => await AddItem());
 
-    #region Methods/Functions
-    private async Task GetAllItems()
-    {
-      ItemListFiltered = new ObservableCollection<Item>(await AppService.GetInstance().GetAllItemsAsync());
-    }
+           
+        }
 
-    private void CreateItemsAccordingACategory(string filter)
-    {
-      ItemListFiltered = new ObservableCollection<Item>(AppService.GetInstance().GetAllItemsAccordingACategory(filter));
-    }
+        private async Task InitializeAsync()
+        {
+            CategoryList = await AppService.GetInstance().GetCategoriesAsync();
+            ItemListFiltered = new ObservableCollection<Item>(await AppService.GetInstance().GetAllItemsAsync());
+            ItemToAddCategories = new ObservableCollection<Category>(AppService.GetInstance().GetCategoriesByOrder());
 
-    private async Task DeleteItem(Item theItemToDelete)
+            if (SelectedCategory == null)
+            {
+                SelectedCategory = CategoryListByOrder[0]; // Select the All option
+            }
+
+        }
+
+        #endregion
+
+        #region Methods/Functions
+        private async Task GetAllItems()
+        {
+            ItemListFiltered = new ObservableCollection<Item>(await AppService.GetInstance().GetAllItemsAsync());
+        }
+
+        private void CreateItemsAccordingACategory(string filter)
+        {
+            ItemListFiltered = new ObservableCollection<Item>(AppService.GetInstance().GetAllItemsAccordingACategory(filter));
+        }
+
+        private async Task DeleteItem(Item theItemToDelete)
         {
             bool successed = await AppService.GetInstance().DeleteItemAsync(theItemToDelete);
-            if (successed)  {
+            if (successed)
+            {
                 ItemListFiltered.Remove(theItemToDelete);
             }
         }
 
-    private async Task AddItem()
-    {
-      List<Category> categoriesToAdd = ItemToAddCategories.Where(category => category.IsChecked == true).ToList();
-      if (categoriesToAdd.Count > 0)
-      {
-        Item itemToAdd = new Item() { Name = itemToAddName, Description = itemToAddDesciption, Categories = categoriesToAdd };
-        bool successed = await AppService.GetInstance().AddItemAsync(itemToAdd);
-        if (successed)
+        private async Task AddItem()
         {
-          //Reset Category picker. the [0] is for selecting All as default
-          SelectedCategory = this.categoryListByOrder.OrderBy(o => o.Order).ToList()[0];
-          OnPropertyChanged(nameof(SelectedCategory));
-          // The above will also Refresh the List of the Items, Since changing SelectCategory has an  GetAllItems(); inside
+            List<Category> categoriesToAdd = ItemToAddCategories.Where(category => category.IsChecked == true).ToList();
+            if (categoriesToAdd.Count > 0)
+            {
+                Item itemToAdd = new Item() { Name = itemToAddName, Description = itemToAddDesciption, Categories = categoriesToAdd };
+                bool successed = await AppService.GetInstance().AddItemAsync(itemToAdd);
+                if (successed)
+                {
+                    //Reset Category picker. the [0] is for selecting All as default
+                    SelectedCategory = this.categoryListByOrder.OrderBy(o => o.Order).ToList()[0];
+                    OnPropertyChanged(nameof(SelectedCategory));
+                    // The above will also Refresh the List of the Items, Since changing SelectCategory has an  GetAllItems(); inside
 
 
 
-          //reseting fields
-          ItemToAddName = "";
-          OnPropertyChanged(nameof(ItemToAddName));
-          ItemToAddDesciption = "";
-          OnPropertyChanged(nameof(ItemToAddDesciption));
+                    //reseting fields
+                    ItemToAddName = "";
+                    OnPropertyChanged(nameof(ItemToAddName));
+                    ItemToAddDesciption = "";
+                    OnPropertyChanged(nameof(ItemToAddDesciption));
 
-          ItemToAddCategories.Clear();
-          ItemToAddCategories = new ObservableCollection<Category>(AppService.GetInstance().GetCategoriesByOrder());
-          foreach (var c in ItemToAddCategories)
-            c.IsChecked = false;
+                    ItemToAddCategories.Clear();
+                    ItemToAddCategories = new ObservableCollection<Category>(AppService.GetInstance().GetCategoriesByOrder());
+                    foreach (var c in ItemToAddCategories)
+                        c.IsChecked = false;
 
-          OnPropertyChanged(nameof(ItemToAddCategories));
+                    OnPropertyChanged(nameof(ItemToAddCategories));
+                }
+            }
+
         }
-      }
-     
+        #endregion
     }
-    #endregion
-  }
 }

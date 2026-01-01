@@ -44,8 +44,14 @@ namespace MinimumMauiProjectExample.ViewModels
             }
         }
 
-        private bool isRegisterButtonEnabled;
+        private string fullName;
+        public string FullName
+        {
+            get { return fullName; }
+            set { fullName = value; }
+        }
 
+        private bool isRegisterButtonEnabled;
         public bool IsRegisterButtonEnabled
         {
             get { return isRegisterButtonEnabled; }
@@ -74,13 +80,11 @@ namespace MinimumMauiProjectExample.ViewModels
         #region Methods / Functions
         private async Task Register()
         {
-            bool successed = await AppService.GetInstance().TryRegister(emailInput, passwordInput1);
+            bool successed = await AppService.GetInstance().TryRegister(EmailInput, PasswordInput1, FullName);
             if (successed)
             {
-                bool successedLogin = await AppService.GetInstance().TryLogin(emailInput, passwordInput1);
-                if (successedLogin) {
-                    await Shell.Current.GoToAsync("//ItemsPage");
-                }
+                ((App)Application.Current).SetAuthenticatedShell();
+                await Shell.Current.GoToAsync("//ItemsPage");
             }
         }
         #endregion

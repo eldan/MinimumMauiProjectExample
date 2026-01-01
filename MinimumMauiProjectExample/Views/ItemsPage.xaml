@@ -7,8 +7,13 @@
     xmlns:viewmodels="clr-namespace:MinimumMauiProjectExample.ViewModels"
     Title="ItemsPage">
     <ScrollView>
-
+        
         <VerticalStackLayout>
+            <HorizontalStackLayout Spacing="5">
+                <Label Text="Full Name is:" />
+                <Label Text="{Binding LoggedInUserName}" />
+            </HorizontalStackLayout>
+
             <Picker
                 Title="Select a Category by Order (we are going to filter Items by this picker)"
                 ItemDisplayBinding="{Binding Name}"
@@ -71,6 +76,8 @@
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
+
+            <Button Text="Add Item" Command="{Binding AddItemCommand}"/>
 
         </VerticalStackLayout>
 
